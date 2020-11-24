@@ -1,0 +1,20 @@
+{
+  "name": "bordspel-networking",
+  "version": "0.0.1",
+  "description": "Node.js server for our digital expansion of our board game.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bordspel/bordspel-networking.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bordspel/bordspel-networking/issues"
+  },
+  "homepage": "https://github.com/bordspel/bordspel-networking#readme"
+}
