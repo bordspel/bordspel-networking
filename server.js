@@ -54,4 +54,4 @@ server.on('connection', function(socket) {
     });
 });
 
-server.listen(8080);
+server.listen(80);
