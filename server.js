@@ -54,4 +54,6 @@ server.on('connection', function(socket) {
     });
 });
 
+let port = process.env.PORT || 3000;
 server.listen(80);
+console.log(`listening on port ${port}` );
