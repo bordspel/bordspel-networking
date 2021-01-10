@@ -12,6 +12,12 @@ function strToJson(str) {
 
 users = []
 
+// Steekspel variables.
+player1 = ""
+player2 = ""
+scorePlayer1 = -1
+scorePlayer2 = -1
+
 server.on('connection', function(socket) {
     console.log('A new connection has been established.');
 	
@@ -30,6 +36,7 @@ server.on('connection', function(socket) {
 				})
 				
 				socket.write(jsonToStr({"type": "handshake", "success": true}));
+				break
 			}
 			case "exit": {
 				for (user of users) {
@@ -37,6 +44,46 @@ server.on('connection', function(socket) {
 						users.splice(users.indexOf(user), 1)
 					}
 				}
+
+				break
+			}
+			case "steekspel": {
+				score = json.score
+
+				if (scorePlayer1 == -1) {
+					scorePlayer1 = score
+
+					player1 = id
+				}
+				else if (scorePlayer2 == -1) {
+					scorePlayer2 = score
+					player2 = id
+
+					// Calculate who won.
+					winner = ""
+
+					if (scorePlayer1 > scorePlayer2) {
+						winner = player1
+					} else if (scorePlayer2 > scorePlayer1) {
+						winner = player2
+					} else {
+						winner = "NONE"
+					}
+
+					for (user of users) {
+						console.log("sent")
+						user.socket.write(jsonToStr({"type": "steekspel", "winner": winner}))
+						user.socket.pipe(user.socket)
+					}
+
+					// Reset the minigame.
+					player1 = ""
+					player2 = ""
+					scorePlayer1 = -1
+					scorePlayer2 = -1
+				}
+
+				break
 			}
 		}
 		
@@ -54,6 +101,6 @@ server.on('connection', function(socket) {
     });
 });
 
-let port = process.env.PORT || 3000;
+let port = 8080;
 server.listen(port);
 console.log(`listening on port ${port}`);
