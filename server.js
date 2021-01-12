@@ -21,6 +21,14 @@ player2 = ""
 scorePlayer1 = -1
 scorePlayer2 = -1
 
+// Pong variables
+playerA = ""
+playerB = ""
+scorePlayerA = -10000
+scorePlayerB = -10000
+
+playerInControl = ""
+
 server.on('connection', function(socket) {
     console.log('A new connection has been established.');
 	
@@ -129,6 +137,41 @@ server.on('connection', function(socket) {
 			
 						break
 					}
+
+					case "pong": {
+						player = json.player
+						scorePlayer = json.scorePlayer
+						scoreBot = json.scoreBot
+
+						if (scorePlayerA == -10000) {
+							playerA = player
+							scorePlayerA = scorePlayer - (scoreBot * 0.5)
+						} else if (scorePlayerB == -10000) {
+							playerB = player
+							scorePlayerB = scorePlayer - (scoreBot * 0.5)
+
+							if (scorePlayerA > scorePlayerB) {
+								winner = playerA
+							} else if (scorePlayerB > scorePlayerA) {
+								winner = playerB
+							} else {
+								winner = "NONE"
+							}
+
+							for (user of users) {
+								user.socket.write(jsonToStr({"type": "pong", "winner": winner}))
+							}
+
+							playerA = ""
+							playerB = ""
+							scorePlayerA = -10000
+							scorePlayerB = -10000
+
+						}
+
+						break
+					}
+
 				}
 				
 				// console.log("Data received from client: " +  message.toString());
