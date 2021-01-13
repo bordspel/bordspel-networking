@@ -32,7 +32,7 @@ playerInControl = ""
 user1 = ""
 user2 = ""
 
-games = ["mario", "steekspel", "pong"]//, "schietspel"]
+games = ["mario", "steekspel", "pong", "schietspel"]
 
 Array.prototype.sample = function() {
 	return this[Math.floor(Math.random()*this.length)];
