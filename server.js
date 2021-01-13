@@ -29,6 +29,15 @@ scorePlayerB = -10000
 
 playerInControl = ""
 
+user1 = ""
+user2 = ""
+
+games = ["mario", "steekspel", "pong"]//, "schietspel"]
+
+Array.prototype.sample = function() {
+	return this[Math.floor(Math.random()*this.length)];
+}
+
 server.on('connection', function(socket) {
     console.log('A new connection has been established.');
 	
@@ -45,9 +54,11 @@ server.on('connection', function(socket) {
 				
 				switch(type) {
 					case "handshake": {
+						username = json.username
 						users.push({
 							"id": id,
 							"room": room,
+							"username": username,
 							"socket": socket
 						})
 						
@@ -63,14 +74,36 @@ server.on('connection', function(socket) {
 			
 						break
 					}
+
+					case "members": {
+						var usernames = []
+						for (user of users) {
+							usernames.push([user.id, user.username])
+						}
+
+						socket.write(jsonToStr({"type": "members", "usernames": usernames}))
+
+						break
+					}
 			
 					case "challenge": {
-						user1 = data.user1
-						user2 = data.user2
-						challenge = data.challenge
+						user1 = json.user1
+						user2 = json.user2
+
+						console.log("RECV CHALLENGE")
+						
+						if (challenge == "") {
+							challenge = games.sample()
+							challengeUsers = [user1, user2]
+						}
 			
-						challengeUsers = [user1, user2]
-			
+						break
+					}
+
+					case "getChallenge": {
+
+						socket.write(jsonToStr({"type": "getChallenge", "user1": user1, "user2": user2, "challenge": challenge}))
+
 						break
 					}
 			
@@ -97,8 +130,12 @@ server.on('connection', function(socket) {
 								winner = "NONE"
 							}
 							
+							challenge = ""
+							user1 = ""
+							user2 = ""
+
 							// Send the winner to all the challengeUsers.
-							for (user of challengeUsers) {
+							for (user of users) {
 								user.socket.write(jsonToStr({"type": "steekspel", "winner": winner}))
 							}
 			
@@ -130,6 +167,9 @@ server.on('connection', function(socket) {
 						if (json.action == "win") {
 							for (user of users) {
 								player = json.player
+								challenge = ""
+								user1 = ""
+								user2 = ""
 			
 								user.socket.write(jsonToStr({"type": "mario", "action": "win", "player": player}))
 							}
@@ -157,6 +197,10 @@ server.on('connection', function(socket) {
 							} else {
 								winner = "NONE"
 							}
+
+							challenge = ""
+							user1 = ""
+							user2 = ""
 
 							for (user of users) {
 								user.socket.write(jsonToStr({"type": "pong", "winner": winner}))
