@@ -32,7 +32,7 @@ playerInControl = ""
 user1 = ""
 user2 = ""
 
-games = ["mario", "steekspel", "pong", "schietspel"]
+games = ["mario", "pong", "schietspel", "steekspel"]
 
 Array.prototype.sample = function () {
 	return this[Math.floor(Math.random() * this.length)];
@@ -91,6 +91,9 @@ server.on('connection', function (socket) {
 
 						if (challenge == "") {
 							challenge = games.sample()
+							if (challenge == "steekspel") {
+								games.pop()
+							}
 							challengeUsers = [user1, user2]
 						}
 
