@@ -1,6 +1,6 @@
 var net = require('net');
 
-var server = net.createServer(function(socket) {});
+var server = net.createServer(function (socket) { });
 
 function jsonToStr(json) {
 	return JSON.stringify(json)
@@ -32,16 +32,16 @@ playerInControl = ""
 user1 = ""
 user2 = ""
 
-games = ["mario", "steekspel", "pong"]//, "schietspel"]
+games = ["mario", "steekspel", "pong", "schietspel"]
 
-Array.prototype.sample = function() {
-	return this[Math.floor(Math.random()*this.length)];
+Array.prototype.sample = function () {
+	return this[Math.floor(Math.random() * this.length)];
 }
 
-server.on('connection', function(socket) {
-    console.log('A new connection has been established.');
-	
-    socket.on('data', function(chunk) {
+server.on('connection', function (socket) {
+	console.log('A new connection has been established.');
+
+	socket.on('data', function (chunk) {
 		message = chunk.toString()
 		messages = message.split("||")
 
@@ -51,9 +51,9 @@ server.on('connection', function(socket) {
 				type = json.type
 				id = json.id
 				room = json.room
-				
-				switch(type) {
-					case "handshake": {
+
+				switch (type) {
+					case "handshake":
 						username = json.username
 						users.push({
 							"id": id,
@@ -61,67 +61,62 @@ server.on('connection', function(socket) {
 							"username": username,
 							"socket": socket
 						})
-						
-						socket.write(jsonToStr({"type": "handshake", "success": true}));
+
+						socket.write(jsonToStr({ "type": "handshake", "success": true }));
 						break
-					}
-					case "exit": {
+					case "exit":
 						for (user of users) {
 							if (user.id == id) {
 								users.splice(users.indexOf(user), 1)
 							}
 						}
-			
-						break
-					}
 
-					case "members": {
+						break
+
+					case "members":
 						var usernames = []
 						for (user of users) {
 							usernames.push([user.id, user.username])
 						}
 
-						socket.write(jsonToStr({"type": "members", "usernames": usernames}))
+						socket.write(jsonToStr({ "type": "members", "usernames": usernames }))
 
 						break
-					}
-			
-					case "challenge": {
+
+					case "challenge":
 						user1 = json.user1
 						user2 = json.user2
 
 						console.log("RECV CHALLENGE")
-						
+
 						if (challenge == "") {
 							challenge = games.sample()
 							challengeUsers = [user1, user2]
 						}
-			
-						break
-					}
-
-					case "getChallenge": {
-
-						socket.write(jsonToStr({"type": "getChallenge", "user1": user1, "user2": user2, "challenge": challenge}))
 
 						break
-					}
-			
-					case "steekspel": {
+
+					case "getChallenge":
+
+						socket.write(jsonToStr({ "type": "getChallenge", "user1": user1, "user2": user2, "challenge": challenge }))
+
+						break
+
+					case "steekspel":
 						score = json.score
-			
+
 						if (scorePlayer1 == -1) {
 							scorePlayer1 = score
-			
+
 							player1 = id
 						}
 						else if (scorePlayer2 == -1) {
 							scorePlayer2 = score
 							player2 = id
-			
+
 							// Calculate who won.
 							winner = ""
-			
+
 							if (scorePlayer1 > scorePlayer2) {
 								winner = player1
 							} else if (scorePlayer2 > scorePlayer1) {
@@ -129,27 +124,26 @@ server.on('connection', function(socket) {
 							} else {
 								winner = "NONE"
 							}
-							
+
 							challenge = ""
 							user1 = ""
 							user2 = ""
 
 							// Send the winner to all the challengeUsers.
 							for (user of users) {
-								user.socket.write(jsonToStr({"type": "steekspel", "winner": winner}))
+								user.socket.write(jsonToStr({ "type": "steekspel", "winner": winner }))
 							}
-			
+
 							// Reset the minigame.
 							player1 = ""
 							player2 = ""
 							scorePlayer1 = -1
 							scorePlayer2 = -1
 						}
-			
+
 						break
-					}
-			
-					case "mario": {
+
+					case "mario":
 						if (json.action == "position") {
 							var player = json.player
 							var x = json.x
@@ -157,28 +151,27 @@ server.on('connection', function(socket) {
 							var xOffset = json.xOffset
 							var direction = json.direction
 							var moving = json.moving
-			
+
 							// Send the data to the other player.
 							for (user of users) {
-								user.socket.write(jsonToStr({"type": "mario", "action": "position", "player": player, "x": x, "y": y, "xOffset": xOffset, "direction": direction, "moving": moving}))
+								user.socket.write(jsonToStr({ "type": "mario", "action": "position", "player": player, "x": x, "y": y, "xOffset": xOffset, "direction": direction, "moving": moving }))
 							}
 						}
-			
+
 						if (json.action == "win") {
 							for (user of users) {
 								player = json.player
 								challenge = ""
 								user1 = ""
 								user2 = ""
-			
-								user.socket.write(jsonToStr({"type": "mario", "action": "win", "player": player}))
+
+								user.socket.write(jsonToStr({ "type": "mario", "action": "win", "player": player }))
 							}
 						}
-			
-						break
-					}
 
-					case "pong": {
+						break
+
+					case "pong":
 						player = json.player
 						scorePlayer = json.scorePlayer
 						scoreBot = json.scoreBot
@@ -203,7 +196,7 @@ server.on('connection', function(socket) {
 							user2 = ""
 
 							for (user of users) {
-								user.socket.write(jsonToStr({"type": "pong", "winner": winner}))
+								user.socket.write(jsonToStr({ "type": "pong", "winner": winner }))
 							}
 
 							playerA = ""
@@ -214,24 +207,53 @@ server.on('connection', function(socket) {
 						}
 
 						break
-					}
 
+					case "schietspel":
+						console.log(json)
+						let p = challengeUsers[0]
+						if (challengeUsers[0] == json.player) {
+							p = challengeUsers[1]
+						}
+						if (json.command == "shoot") {
+							users.forEach((e) => {
+								if (e.id == p) {
+									e.socket.write(jsonToStr({ "type": "schietspel", "command": "shoot", "vel": json.vel}))
+								}
+							})
+						} else if (json.command == "stick") {
+							users.forEach((e) => {
+								if (e.id == p) {
+									e.socket.write(jsonToStr({ "type": "schietspel", "command": "stick", "pos": json.pos, "prevPos": json.prevPos, "hit": json.hit}))
+								}
+							})
+						} else if (json.command == "won") {
+							console.log("won")
+							users.forEach((e) => {
+								if (e.id == p) {
+									e.socket.write(jsonToStr({ "type": "schietspel", "command": "won", "name": e.username}))
+								}
+							})
+							challenge = ""
+							user1 = ""
+							user2 = ""
+						}
+						break
 				}
-				
+
 				// console.log("Data received from client: " +  message.toString());
 			}
 		}
-    });
-
-    // When the client requests to end the TCP connection with the server, the server
-    // ends the connection.
-    socket.on('end', function() {
-        console.log('Closing connection with the client');
 	});
-		
-	socket.on('error', function(err) {
+
+	// When the client requests to end the TCP connection with the server, the server
+	// ends the connection.
+	socket.on('end', function () {
+		console.log('Closing connection with the client');
+	});
+
+	socket.on('error', function (err) {
 		console.log("Error: " + err);
-    });
+	});
 });
 
 let port = 8080;
